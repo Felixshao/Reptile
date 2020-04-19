@@ -25,7 +25,8 @@ class ReadInter():
         for i in range(3, row+1):
             value_dict = {}
             for j in range(col):
-                value_dict[sheet[2][j].value] = str(sheet[i][j].value).replace('’', "'").replace('‘', "'")
+                value_dict[sheet[2][j].value] = str(sheet[i][j].value).replace('’', "'").replace('‘', "'")\
+                    .replace('\n', '')
             sheets.append(value_dict)
         return sheets
 

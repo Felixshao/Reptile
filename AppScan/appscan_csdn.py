@@ -2,8 +2,8 @@ import requests, re, openpyxl, os, time, warnings
 from bs4 import BeautifulSoup
 from config.ReadInterfaceConfig import ReadInter
 
-warnings.filterwarnings('ignore')        #  忽略warnings警告
-data = ReadInter().readExcel_config()[1]
+warnings.filterwarnings('ignore')        # 忽略warnings警告
+data = ReadInter().readExcel_config()[1]    # 获取csdn搜索appscan接口信息
 params = eval(data['参数'])
 headers = eval(data['请求头'])
 

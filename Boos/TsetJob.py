@@ -1,10 +1,14 @@
 import requests, re, json, openpyxl, os, time
 from bs4 import BeautifulSoup
 from config.ReadInterfaceConfig import ReadInter
+from config.ProjectPath import get_project_path
 
-data = ReadInter().readExcel_config()[0]
+data = ReadInter().readExcel_config()[0]    # 获取boos搜索软件测试接口信息
+path = get_project_path()
 params = eval(data['参数'])
 headers = eval(data['请求头'])
+filepath = os.path.join(path, 'file', 'BoosJob.xlsx')
+sheetname = '软件测试2'
 
 
 def get_testJob_ing():
@@ -27,7 +31,7 @@ def get_testJob_ing():
             job['招聘链接'] = boos_url + test.find(name='div', attrs={'class': 'primary-box'})['href']
             test_jobs.append(job)
 
-    write_excel('d:\\study\\python\\Reptile\\file\\BoosJob.xlsx', '软件测试2', test_jobs)
+    write_excel(tablepath=filepath, sheetname=sheetname, datas=test_jobs)
 
 
 def write_excel(tablepath, sheetname, datas):
