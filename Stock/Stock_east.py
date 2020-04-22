@@ -1,5 +1,5 @@
 import requests, json, os, openpyxl, time, sys
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from config.ProjectPath import get_project_path
 from config.ReadInterfaceConfig import ReadInter
