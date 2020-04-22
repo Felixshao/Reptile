@@ -1,4 +1,6 @@
-import requests, json, os, openpyxl, time
+import requests, json, os, openpyxl, time, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from config.ProjectPath import get_project_path
 from config.ReadInterfaceConfig import ReadInter
 
@@ -24,7 +26,9 @@ def get_stock_east():
             stock_dict['名称'] = data['f14']
             stock_dict['代码'] = data['f12']
             stock_dict['最新'] = '最新;' + str(data['f2']) + ', '
-            stock_dict['跌涨幅'] = '跌涨幅:' + str(data['f3']) + '%'
+            stock_dict['跌涨幅'] = '跌涨幅:' + str(data['f3']) + '%, '
+            stock_dict['今日主力净流入'] = '今日主力净流入:' + str(data['f62']) + ', '
+            stock_dict['今日超大单净流入'] = '今日超大单净流入:' + str(data['f66'])
             stock_dict['时间'] = str(time.strftime('%Y%m%d', time.localtime()))
             stock_lists.append(stock_dict)
     write_excel(filepath, sheetname, stock_lists)
@@ -51,32 +55,29 @@ def write_excel(tablepath, sheetname, datas):
 
     max_row = sheet.max_row
     max_col = sheet.max_column
-
-    if str(sheet[2][max_col-1].value) != datas[0]['时间']:
-        sheet.cell(2, max_col+1, datas[0]['时间'])
-        if sheet[3][0].value is None:
-            print(1)
+    if sheet[3][0].value is None:
             row = 3
             for data in datas:
                 col = 1
                 sheet.cell(row, col, data['名称'])
                 sheet.cell(row, col + 1, data['代码'])
-                sheet.cell(row, col + 2, data['最新'] + data['跌涨幅'])
-                print(row, col)
+                sheet.cell(row, col + 2, data['最新'] + data['跌涨幅'] + data['今日主力净流入'] + data['今日超大单净流入'])
                 row += 1
-        else:
-            print(2)
-            old_stock_data = get_excel(tablepath, sheetname)
-            for data in datas:
-                if data['代码'] in old_stock_data:
-                    row = old_stock_data.index(data['代码']) + 3
-                    sheet.cell(row, max_col + 1, data['最新'] + data['跌涨幅'])
-                else:
-                    col = 1
-                    max_row += 1
-                    sheet.cell(max_row, col, data['名称'])
-                    sheet.cell(max_row, col + 1, data['代码'])
-                    sheet.cell(max_row, max_col + 1, data['最新'] + data['跌涨幅'])
+    else:
+        if str(sheet[2][max_col - 1].value) != datas[0]['时间']:
+            max_col += 1
+            sheet.cell(2, max_col, datas[0]['时间'])
+        old_stock_data = get_excel(tablepath, sheetname)
+        for data in datas:
+            if data['代码'] in old_stock_data:
+                row = old_stock_data.index(data['代码']) + 3
+                sheet.cell(row, max_col, data['最新'] + data['跌涨幅'] + data['今日主力净流入'] + data['今日超大单净流入'])
+            else:
+                col = 1
+                max_row += 1
+                sheet.cell(max_row, col, data['名称'])
+                sheet.cell(max_row, col + 1, data['代码'])
+                sheet.cell(max_row, max_col, data['最新'] + data['跌涨幅'] + data['今日主力净流入'] + data['今日超大单净流入'])
     job.save(tablepath)
 
 
