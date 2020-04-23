@@ -10,7 +10,8 @@ stock_east_url = stock_east_data['接口链接']
 headers = eval(stock_east_data['请求头'])
 params = eval(stock_east_data['参数'])
 filepath = os.path.join(path, 'file', 'stock_east.xlsx')
-sheetname = '东方财富股票统计'
+stocks_sheetname = '东方财富股票统计'
+stock_count_sheetname = '近三天连涨股票统计'
 
 
 def get_stock_east():
@@ -31,7 +32,7 @@ def get_stock_east():
             stock_dict['今日超大单净流入'] = '今日超大单净流入:' + str(data['f66'])
             stock_dict['时间'] = str(time.strftime('%Y%m%d', time.localtime()))
             stock_lists.append(stock_dict)
-    write_excel(filepath, sheetname, stock_lists)
+    write_excel(filepath, stocks_sheetname, stock_lists)
 
 
 def write_excel(tablepath, sheetname, datas):
@@ -67,7 +68,7 @@ def write_excel(tablepath, sheetname, datas):
         if str(sheet[2][max_col - 1].value) != datas[0]['时间']:
             max_col += 1
             sheet.cell(2, max_col, datas[0]['时间'])
-        old_stock_data = get_excel(tablepath, sheetname)
+        old_stock_data = get_excel_stockCode(tablepath, sheetname)
         for data in datas:
             if data['代码'] in old_stock_data:
                 row = old_stock_data.index(data['代码']) + 3
@@ -81,8 +82,8 @@ def write_excel(tablepath, sheetname, datas):
     job.save(tablepath)
 
 
-def get_excel(filepath, sheetname):
-    """获取excel表数据"""
+def get_excel_stockCode(filepath, sheetname):
+    """获取excel表中以保存的股票代码，存入list"""
     job = openpyxl.load_workbook(filepath)
     sheet = job[sheetname]
     data_lists = []
@@ -91,5 +92,47 @@ def get_excel(filepath, sheetname):
     return data_lists
 
 
+def stat_nearly_three():
+    """统计近三天连涨股票"""
+    table = openpyxl.load_workbook(filepath)
+    sheet = table[stocks_sheetname]
+    max_row = sheet.max_row
+    max_col = sheet.max_column
+    stocks = []
+    for row in range(3, max_row+1):
+        count = {}
+        if sheet[row][max_col-1].value and sheet[row][max_col-2].value and sheet[row][max_col-3].value:
+            count['名称'] = sheet[row][0].value
+            count['代码'] = sheet[row][1].value
+            stocks.append(count)
+
+    # 写入统计表格
+    """写入excel表"""
+    if os.path.exists(filepath):
+        job = openpyxl.load_workbook(filepath)
+    else:
+        job = openpyxl.Workbook(filepath)
+    if stock_count_sheetname in job.sheetnames:
+        sheet = job[stock_count_sheetname]
+    else:
+        job.create_sheet(title=stock_count_sheetname)
+        job.save(filepath)
+        time.sleep(3)
+        job = openpyxl.load_workbook(filepath)
+        sheet = job[stock_count_sheetname]
+        sheet.cell(1, 1, stock_count_sheetname)
+        sheet.cell(2, 1, '名称')
+        sheet.cell(2, 2, '代码')
+
+    row = 3
+    for data in stocks:
+        sheet.cell(row, 1, data['名称'])
+        sheet.cell(row, 2, data['代码'])
+        row += 1
+    job.save(filepath)
+
+
 if __name__ == '__main__':
     get_stock_east()
+    time.sleep(5)
+    stat_nearly_three()
