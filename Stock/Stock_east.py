@@ -11,7 +11,7 @@ headers = eval(stock_east_data['请求头'])
 params = eval(stock_east_data['参数'])
 filepath = os.path.join(path, 'file', 'stock_east.xlsx')
 stocks_sheetname = '东方财富股票统计'
-stock_count_sheetname = '近三天连涨股票统计'
+stock_count_sheetname = '近两天连涨股票统计'
 
 
 def get_stock_east():
@@ -101,7 +101,7 @@ def stat_nearly_three():
     stocks = []
     for row in range(3, max_row+1):
         count = {}
-        if sheet[row][max_col-1].value and sheet[row][max_col-2].value and sheet[row][max_col-3].value:
+        if sheet[row][max_col-1].value and sheet[row][max_col-2].value:
             count['名称'] = sheet[row][0].value
             count['代码'] = sheet[row][1].value
             stocks.append(count)
@@ -123,7 +123,11 @@ def stat_nearly_three():
         sheet.cell(1, 1, stock_count_sheetname)
         sheet.cell(2, 1, '名称')
         sheet.cell(2, 2, '代码')
-
+    max_row = sheet.max_row
+    if sheet[3][0].value is not None:
+        for row in range(3, max_row+1):
+            sheet.cell(row, 1, '')
+            sheet.cell(row, 2, '')
     row = 3
     for data in stocks:
         sheet.cell(row, 1, data['名称'])
@@ -136,3 +140,4 @@ if __name__ == '__main__':
     get_stock_east()
     time.sleep(5)
     stat_nearly_three()
+
