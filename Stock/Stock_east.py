@@ -26,7 +26,7 @@ def get_stock_east():
             stock_dict = {}
             stock_dict['名称'] = data['f14']
             stock_dict['代码'] = data['f12']
-            stock_dict['最新'] = '最新;' + str(data['f2']) + ', '
+            stock_dict['最新'] = '最新:' + str(data['f2']) + ', '
             stock_dict['跌涨幅'] = '跌涨幅:' + str(data['f3']) + '%, '
             stock_dict['今日主力净流入'] = '今日主力净流入:' + str(data['f62']) + ', '
             stock_dict['今日超大单净流入'] = '今日超大单净流入:' + str(data['f66'])
@@ -93,7 +93,7 @@ def get_excel_stockCode(filepath, sheetname):
 
 
 def stat_nearly_three():
-    """统计近三天连涨股票"""
+    """统计近两天连涨股票"""
     table = openpyxl.load_workbook(filepath)
     sheet = table[stocks_sheetname]
     max_row = sheet.max_row
@@ -102,9 +102,10 @@ def stat_nearly_three():
     for row in range(3, max_row+1):
         count = {}
         if sheet[row][max_col-1].value and sheet[row][max_col-2].value:
-            count['名称'] = sheet[row][0].value
-            count['代码'] = sheet[row][1].value
-            stocks.append(count)
+            if float(sheet[row][max_col-1].value.split(',')[0].split(':')[1]) <= 20.0:
+                count['名称'] = sheet[row][0].value
+                count['代码'] = sheet[row][1].value
+                stocks.append(count)
 
     # 写入统计表格
     """写入excel表"""
